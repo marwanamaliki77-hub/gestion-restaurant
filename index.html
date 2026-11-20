@@ -1,0 +1,449 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RestoPilot - Gestion Restaurant</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f5f3;color:#202b25}
+header{background:#173b2d;color:white;padding:20px}
+header h1{margin:0}
+header p{margin:6px 0 0;color:#c8dfd1}
+nav{display:flex;overflow-x:auto;background:#214d3b;padding:8px;gap:6px}
+nav button{background:transparent;color:white;white-space:nowrap}
+button{border:0;border-radius:7px;padding:11px 14px;background:#18734d;color:white;font-weight:bold;cursor:pointer}
+button.secondary{background:#e4eee8;color:#204c37}
+button.danger{background:#ffe8e8;color:#b52e2e}
+main{padding:16px;max-width:1200px;margin:auto}
+section{display:none}
+section.active{display:block}
+h2{margin-top:5px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.card,.panel{background:white;border-radius:12px;padding:17px;margin-bottom:14px;box-shadow:0 2px 9px #0000000b}
+.card strong{font-size:23px;display:block;margin-top:12px;color:#18734d}
+.card span{color:#65756b}
+input,select{padding:11px;border:1px solid #d5ded8;border-radius:7px;width:100%;margin:5px 0 12px}
+label{font-size:13px;font-weight:bold}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+table{width:100%;border-collapse:collapse;min-width:550px}
+th,td{text-align:left;padding:12px 8px;border-bottom:1px solid #e5eae6;font-size:14px}
+th{background:#f0f5f1}
+.tablewrap{overflow-x:auto}
+.tag{background:#e2f2e8;color:#17623f;padding:5px 9px;border-radius:20px;font-size:12px}
+.low{background:#ffe8e8;color:#b52e2e}
+.actions{display:flex;gap:5px;flex-wrap:wrap}
+small{color:#718078}
+.empty{padding:20px;color:#718078;text-align:center}
+footer{text-align:center;color:#829087;padding:20px}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🍽️ RestoPilot</h1>
+<p>Le système intelligent de gestion de votre restaurant</p>
+</header>
+
+<nav>
+<button onclick="page('home')">📊 Accueil</button>
+<button onclick="page('orders')">🧾 Commandes</button>
+<button onclick="page('menu')">🍲 Menu</button>
+<button onclick="page('tables')">🪑 Tables</button>
+<button onclick="page('stock')">📦 Stock</button>
+<button onclick="page('expenses')">💰 Dépenses</button>
+<button onclick="page('reports')">📈 Rapports</button>
+<button onclick="page('settings')">⚙️ Paramètres</button>
+</nav>
+
+<main>
+
+<section id="home" class="active">
+<h2>Tableau de bord</h2>
+<div class="cards">
+<div class="card"><span>Chiffre d'affaires</span><strong id="sales">0 FCFA</strong></div>
+<div class="card"><span>Commandes</span><strong id="count">0</strong></div>
+<div class="card"><span>Commandes en cours</span><strong id="pending">0</strong></div>
+<div class="card"><span>Alertes de stock</span><strong id="alerts">0</strong></div>
+</div>
+<div class="panel">
+<h3>Bienvenue sur RestoPilot 👋</h3>
+<p>Gérez les activités de votre restaurant depuis un seul endroit.</p>
+<div class="actions">
+<button onclick="page('orders')">Nouvelle commande</button>
+<button onclick="page('menu')">Ajouter un plat</button>
+<button onclick="page('stock')">Gérer le stock</button>
+</div>
+</div>
+<div class="panel">
+<h3>Dernières commandes</h3>
+<div id="recent"></div>
+</div>
+</section>
+
+<section id="orders">
+<h2>Gestion des commandes</h2>
+<div class="panel">
+<h3>Nouvelle commande</h3>
+<div class="form">
+<div><label>Nom du client</label><input id="customer" placeholder="Nom du client"></div>
+<div><label>Numéro de table</label><input id="tableOrder" type="number" placeholder="Ex : 2"></div>
+<div><label>Produit</label><select id="orderProduct"></select></div>
+<div><label>Quantité</label><input id="quantity" type="number" min="1" value="1"></div>
+</div>
+<button onclick="addOrder()">Enregistrer la commande</button>
+</div>
+<div class="panel">
+<h3>Historique des commandes</h3>
+<div id="orderList" class="tablewrap"></div>
+</div>
+</section>
+
+<section id="menu">
+<h2>Menu et produits</h2>
+<div class="panel">
+<h3>Ajouter un produit</h3>
+<div class="form">
+<div><label>Nom du plat</label><input id="productName" placeholder="Ex : Poulet braisé"></div>
+<div><label>Catégorie</label>
+<select id="category"><option>Plat</option><option>Boisson</option><option>Dessert</option><option>Entrée</option><option>Autre</option></select></div>
+<div><label>Prix (FCFA)</label><input id="price" type="number" min="0"></div>
+<div><label>Stock initial</label><input id="initialStock" type="number" min="0" value="0"></div>
+</div>
+<button onclick="addProduct()">Ajouter au menu</button>
+</div>
+<div class="panel">
+<h3>Liste des produits</h3>
+<div id="productList" class="tablewrap"></div>
+</div>
+</section>
+
+<section id="tables">
+<h2>Gestion des tables</h2>
+<div class="panel">
+<button onclick="addTable()">＋ Ajouter une table</button>
+<div id="tableList" class="cards" style="margin-top:15px"></div>
+</div>
+</section>
+
+<section id="stock">
+<h2>Gestion du stock</h2>
+<div class="panel">
+<h3>Ajouter ou retirer du stock</h3>
+<div class="form">
+<div><label>Produit</label><select id="stockProduct"></select></div>
+<div><label>Type de mouvement</label><select id="movement"><option value="in">Entrée</option><option value="out">Sortie</option></select></div>
+<div><label>Quantité</label><input id="stockQuantity" type="number" min="1" value="1"></div>
+</div>
+<button onclick="updateStock()">Valider le mouvement</button>
+</div>
+<div class="panel">
+<h3>Inventaire</h3>
+<div id="stockList" class="tablewrap"></div>
+</div>
+</section>
+
+<section id="expenses">
+<h2>Gestion des dépenses</h2>
+<div class="panel">
+<h3>Enregistrer une dépense</h3>
+<label>Motif de la dépense</label>
+<input id="expenseName" placeholder="Ex : Achat de légumes">
+<label>Montant en FCFA</label>
+<input id="expenseAmount" type="number" min="1">
+<button onclick="addExpense()">Enregistrer</button>
+</div>
+<div class="panel">
+<h3>Historique des dépenses</h3>
+<div id="expenseList" class="tablewrap"></div>
+</div>
+</section>
+
+<section id="reports">
+<h2>Rapports financiers</h2>
+<div class="cards">
+<div class="card"><span>Ventes encaissées</span><strong id="reportSales">0</strong></div>
+<div class="card"><span>Dépenses</span><strong id="reportExpenses">0</strong></div>
+<div class="card"><span>Solde estimé</span><strong id="balance">0</strong></div>
+</div>
+<div class="panel">
+<h3>Historique des ventes</h3>
+<div id="reportList" class="tablewrap"></div>
+<button onclick="window.print()">🖨️ Imprimer le rapport</button>
+</div>
+</section>
+
+<section id="settings">
+<h2>Paramètres du restaurant</h2>
+<div class="panel">
+<label>Nom du restaurant</label>
+<input id="restaurantName" placeholder="Nom du restaurant">
+<label>Téléphone</label>
+<input id="restaurantPhone" placeholder="Téléphone">
+<label>Adresse</label>
+<input id="restaurantAddress" placeholder="Adresse">
+<button onclick="saveSettings()">Enregistrer les paramètres</button>
+</div>
+<div class="panel">
+<h3>Sauvegarde des données</h3>
+<button onclick="backup()">Télécharger une sauvegarde</button>
+<br><br>
+<label>Restaurer une sauvegarde JSON</label>
+<input type="file" id="restoreFile" accept=".json">
+<button onclick="restore()">Importer les données</button>
+</div>
+<div class="panel">
+<button class="danger" onclick="resetAll()">Réinitialiser les données</button>
+</div>
+</section>
+
+</main>
+
+<footer>RestoPilot © 2026 — Gestion de restaurant</footer>
+
+<script>
+const KEY="restopilot_data";
+
+let db;
+try {
+db=JSON.parse(localStorage.getItem(KEY)) || {};
+} catch(e) { db={}; }
+
+db.products=db.products||[];
+db.orders=db.orders||[];
+db.expenses=db.expenses||[];
+db.tables=db.tables||Array.from({length:6},(_,i)=>({id:i+1,occupied:false}));
+db.settings=db.settings||{};
+
+function save(){
+localStorage.setItem(KEY,JSON.stringify(db));
+render();
+}
+
+function money(n){
+return Number(n||0).toLocaleString("fr-FR")+" FCFA";
+}
+
+function safe(s){
+return String(s??"").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+}
+
+function page(id){
+document.querySelectorAll("main section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+function addProduct(){
+let name=document.getElementById("productName").value.trim();
+let price=Number(document.getElementById("price").value);
+let stock=Number(document.getElementById("initialStock").value);
+if(!name||price<0||!Number.isFinite(price)){
+alert("Vérifie le nom et le prix.");return;
+}
+db.products.push({
+id:Date.now(),name,
+category:document.getElementById("category").value,
+price,stock:Math.max(0,stock),threshold:3
+});
+document.getElementById("productName").value="";
+document.getElementById("price").value="";
+save();
+alert("Produit ajouté !");
+}
+
+function addOrder(){
+let customer=document.getElementById("customer").value.trim()||"Client";
+let id=Number(document.getElementById("orderProduct").value);
+let product=db.products.find(p=>p.id===id);
+let qty=Number(document.getElementById("quantity").value);
+if(!product||qty<1||!Number.isInteger(qty)){
+alert("Sélectionne un produit et une quantité valide.");return;
+}
+if(product.stock<qty){
+alert("Stock insuffisant.");return;
+}
+product.stock-=qty;
+let table=document.getElementById("tableOrder").value;
+db.orders.push({
+id:Date.now(),customer,table,
+product:product.name,quantity:qty,
+total:product.price*qty,
+status:"En attente",
+date:new Date().toLocaleString("fr-FR")
+});
+document.getElementById("customer").value="";
+document.getElementById("quantity").value=1;
+save();
+alert("Commande enregistrée !");
+}
+
+function changeStatus(id){
+let o=db.orders.find(x=>x.id===id);
+let s=prompt("Nouveau statut : En attente, En préparation, Servie, Payée ou Annulée",o.status);
+if(!s)return;
+if(!["En attente","En préparation","Servie","Payée","Annulée"].includes(s)){
+alert("Statut non reconnu.");return;
+}
+o.status=s;
+save();
+}
+
+function deleteOrder(id){
+if(!confirm("Supprimer cette commande ?"))return;
+db.orders=db.orders.filter(o=>o.id!==id);
+save();
+}
+
+function addTable(){
+let id=Math.max(0,...db.tables.map(t=>t.id))+1;
+db.tables.push({id,occupied:false});
+save();
+}
+
+function toggleTable(id){
+let t=db.tables.find(x=>x.id===id);
+t.occupied=!t.occupied;
+save();
+}
+
+function removeTable(id){
+if(!confirm("Supprimer cette table ?"))return;
+db.tables=db.tables.filter(t=>t.id!==id);
+save();
+}
+
+function updateStock(){
+let id=Number(document.getElementById("stockProduct").value);
+let p=db.products.find(x=>x.id===id);
+let q=Number(document.getElementById("stockQuantity").value);
+if(!p||q<1||!Number.isInteger(q)){alert("Quantité invalide.");return;}
+if(document.getElementById("movement").value==="in"){
+p.stock+=q;
+}else{
+if(p.stock<q){alert("Stock insuffisant.");return;}
+p.stock-=q;
+}
+save();
+alert("Stock actualisé !");
+}
+
+function addExpense(){
+let name=document.getElementById("expenseName").value.trim();
+let amount=Number(document.getElementById("expenseAmount").value);
+if(!name||amount<=0){alert("Renseigne le motif et le montant.");return;}
+db.expenses.push({id:Date.now(),name,amount,date:new Date().toLocaleString("fr-FR")});
+document.getElementById("expenseName").value="";
+document.getElementById("expenseAmount").value="";
+save();
+}
+
+function deleteExpense(id){
+if(!confirm("Supprimer cette dépense ?"))return;
+db.expenses=db.expenses.filter(e=>e.id!==id);
+save();
+}
+
+function saveSettings(){
+db.settings={
+name:document.getElementById("restaurantName").value,
+phone:document.getElementById("restaurantPhone").value,
+address:document.getElementById("restaurantAddress").value
+};
+save();
+alert("Paramètres enregistrés !");
+}
+
+function backup(){
+let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="sauvegarde-restaurant.json";
+a.click();
+URL.revokeObjectURL(a.href);
+}
+
+function restore(){
+let file=document.getElementById("restoreFile").files[0];
+if(!file){alert("Choisis un fichier.");return;}
+let reader=new FileReader();
+reader.onload=()=>{
+try{
+let d=JSON.parse(reader.result);
+if(!Array.isArray(d.products)||!Array.isArray(d.orders))throw Error();
+db=d;
+save();
+alert("Sauvegarde restaurée !");
+}catch(e){alert("Fichier invalide.");}
+};
+reader.readAsText(file);
+}
+
+function resetAll(){
+if(!confirm("Effacer toutes les données ? Cette action est irréversible."))return;
+localStorage.removeItem(KEY);
+db={products:[],orders:[],expenses:[],tables:[],settings:{}};
+save();
+}
+
+function render(){
+let sales=db.orders.filter(o=>o.status==="Payée").reduce((s,o)=>s+o.total,0);
+let expenses=db.expenses.reduce((s,e)=>s+e.amount,0);
+let pending=db.orders.filter(o=>!["Payée","Annulée"].includes(o.status)).length;
+let alerts=db.products.filter(p=>p.stock<=p.threshold).length;
+
+document.getElementById("sales").textContent=money(sales);
+document.getElementById("count").textContent=db.orders.length;
+document.getElementById("pending").textContent=pending;
+document.getElementById("alerts").textContent=alerts;
+
+document.getElementById("reportSales").textContent=money(sales);
+document.getElementById("reportExpenses").textContent=money(expenses);
+document.getElementById("balance").textContent=money(sales-expenses);
+
+let opts=db.products.map(p=>`<option value="${p.id}">${safe(p.name)} - ${money(p.price)}</option>`).join("");
+document.getElementById("orderProduct").innerHTML=opts||'<option value="">Aucun produit</option>';
+document.getElementById("stockProduct").innerHTML=opts||'<option value="">Aucun produit</option>';
+
+let orders=[...db.orders].reverse();
+document.getElementById("orderList").innerHTML=orders.length?`<table><tr><th>Date</th><th>Client</th><th>Produit</th><th>Total</th><th>Statut</th><th>Actions</th></tr>${orders.map(o=>`<tr><td>${safe(o.date)}</td><td>${safe(o.customer)}</td><td>${safe(o.product)} ×${o.quantity}</td><td>${money(o.total)}</td><td>${safe(o.status)}</td><td><button onclick="changeStatus(${o.id})">Statut</button> <button class="danger" onclick="deleteOrder(${o.id})">✕</button></td></tr>`).join("")}</table>`:'<div class="empty">Aucune commande enregistrée.</div>';
+
+document.getElementById("recent").innerHTML=orders.slice(0,5).map(o=>`<p>Commande de ${safe(o.customer)} — ${money(o.total)} — ${safe(o.status)}</p>`).join("")||'<div class="empty">Aucune commande.</div>';
+
+document.getElementById("productList").innerHTML=db.products.length?`<table><tr><th>Produit</th><th>Catégorie</th><th>Prix</th><th>Stock</th><th>Action</th></tr>${db.products.map(p=>`<tr><td>${safe(p.name)}</td><td>${safe(p.category)}</td><td>${money(p.price)}</td><td>${p.stock}</td><td><button class="secondary" onclick="editProduct(${p.id})">Modifier</button> <button class="danger" onclick="deleteProduct(${p.id})">Supprimer</button></td></tr>`).join("")}</table>`:'<div class="empty">Aucun produit.</div>';
+
+document.getElementById("stockList").innerHTML=db.products.length?`<table><tr><th>Produit</th><th>Quantité</th><th>État</th></tr>${db.products.map(p=>`<tr><td>${safe(p.name)}</td><td>${p.stock}</td><td><span class="tag ${p.stock<=p.threshold?'low':''}">${p.stock<=p.threshold?'Stock faible':'Disponible'}</span></td></tr>`).join("")}</table>`:'<div class="empty">Aucun produit.</div>';
+
+document.getElementById("tableList").innerHTML=db.tables.map(t=>`<div class="card"><h3>Table ${t.id}</h3><span class="tag ${t.occupied?'low':''}">${t.occupied?'Occupée':'Libre'}</span><p><button onclick="toggleTable(${t.id})">${t.occupied?'Libérer':'Occuper'}</button> <button class="danger" onclick="removeTable(${t.id})">Supprimer</button></p></div>`).join("")||'<div class="empty">Aucune table.</div>';
+
+document.getElementById("expenseList").innerHTML=db.expenses.length?`<table><tr><th>Date</th><th>Motif</th><th>Montant</th><th>Action</th></tr>${db.expenses.map(e=>`<tr><td>${safe(e.date)}</td><td>${safe(e.name)}</td><td>${money(e.amount)}</td><td><button class="danger" onclick="deleteExpense(${e.id})">Supprimer</button></td></tr>`).join("")}</table>`:'<div class="empty">Aucune dépense.</div>';
+
+document.getElementById("reportList").innerHTML=orders.length?`<table><tr><th>Date</th><th>Client</th><th>Total</th><th>Statut</th></tr>${orders.map(o=>`<tr><td>${safe(o.date)}</td><td>${safe(o.customer)}</td><td>${money(o.total)}</td><td>${safe(o.status)}</td></tr>`).join("")}</table>`:'<div class="empty">Aucune vente.</div>';
+
+document.getElementById("restaurantName").value=db.settings.name||"";
+document.getElementById("restaurantPhone").value=db.settings.phone||"";
+document.getElementById("restaurantAddress").value=db.settings.address||"";
+}
+
+function editProduct(id){
+let p=db.products.find(x=>x.id===id);
+let name=prompt("Nom du produit :",p.name);
+if(name===null)return;
+let price=Number(prompt("Prix en FCFA :",p.price));
+if(!name.trim()||!Number.isFinite(price)||price<0){alert("Informations invalides.");return;}
+p.name=name.trim();p.price=price;
+save();
+}
+
+function deleteProduct(id){
+if(!confirm("Supprimer ce produit ?"))return;
+db.products=db.products.filter(p=>p.id!==id);
+save();
+}
+
+render();
+</script>
+</body>
+</html>
