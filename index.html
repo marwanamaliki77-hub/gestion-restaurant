@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RestoPilot - Gestion Restaurant</title>
+<title>Gestion Restaurant</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f3f5f3;color:#202b25}
@@ -37,39 +37,39 @@ th{background:#f0f5f1}
 small{color:#718078}
 .empty{padding:20px;color:#718078;text-align:center}
 footer{text-align:center;color:#829087;padding:20px}
-</style>
-</head>
-<body>
+</ style >
+</ tête >
+< corps >
 
-<header>
-<h1>🍽️ RestoPilot</h1>
-<p>Le système intelligent de gestion de votre restaurant</p>
-</header>
+< en-tête >
+< h1 > 🍽️ RestoPilot </ h1 >
+< p > Le système intelligent de gestion de votre restaurant </ p >
+</ en-tête >
 
-<nav>
-<button onclick="page('home')">📊 Accueil</button>
-<button onclick="page('orders')">🧾 Commandes</button>
-<button onclick="page('menu')">🍲 Menu</button>
-<button onclick="page('tables')">🪑 Tables</button>
-<button onclick="page('stock')">📦 Stock</button>
-<button onclick="page('expenses')">💰 Dépenses</button>
-<button onclick="page('reports')">📈 Rapports</button>
-<button onclick="page('settings')">⚙️ Paramètres</button>
-</nav>
+< navigation >
+ page('home')">📊 Accueil</button
+ page('orders')"
+ page('menu')"
+ page('tables')"
+ page('stock')"
+ page('expenses')"
+ page('reports')"
+ page('settings')"
+</ nav >
 
-<main>
+< principal >
 
-<section id="home" class="active">
-<h2>Tableau de bord</h2>
-<div class="cards">
-<div class="card"><span>Chiffre d'affaires</span><strong id="sales">0 FCFA</strong></div>
-<div class="card"><span>Commandes</span><strong id="count">0</strong></div>
-<div class="card"><span>Commandes en cours</span><strong id="pending">0</strong></div>
-<div class="card"><span>Alertes de stock</span><strong id="alerts">0</strong></div>
-</div>
-<div class="panel">
-<h3>Bienvenue sur RestoPilot 👋</h3>
-<p>Gérez les activités de votre restaurant depuis un seul endroit.</p>
+< section  id = "home"  class = "active" >
+< h2 > Tableau de bord </ h2 >
+< div  class = "cards" >
+< div  class = "card" > < span > Chiffre d'affaires </ span > < strong  id = "sales" > 0 FCFA </ strong > </ div >
+< div  class = " card " > <span> Commandes </span> < strong id = " count " > 0 </strong> </div>​​​​ 
+< div  class = " card " > <span> Commandes en cours </span> < strong id = " pending " > 0 </strong> </div>​​ 
+< div  class = " card " > <span> Alertes de stock </span> < strong id = " alerts " > 0 </strong> </div>​​ 
+</ div >
+< div  class = "panel" >
+< h3 > Bienvenue sur notre plateforme en ligne👋 </ h3 >
+< p > Gérez les activités de votre restaurant depuis un seul endroit. </p>​​
 <div class="actions">
 <button onclick="page('orders')">Nouvelle commande</button>
 <button onclick="page('menu')">Ajouter un plat</button>
